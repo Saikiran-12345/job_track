@@ -1,0 +1,14 @@
+# Django Core Web Framework
+Django>=4.2.0,<5.0.0
+
+# Django REST Framework for building RESTful APIs
+djangorestframework>=3.14.0
+
+# MySQL database driver (pure Python, cross-platform)
+pymysql>=1.1.0
+
+# Cryptography for secure authentication backend with MySQL 8.0 caching_sha2_password
+cryptography>=41.0.0
+
+# Environment variables management
+python-dotenv>=1.0.0
