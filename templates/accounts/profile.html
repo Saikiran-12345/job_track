@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile – JobTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-lg-8">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Profile Settings</li>
+            </ol>
+        </nav>
+
+        <div class="row g-4">
+            <!-- User Summary Sidebar Card -->
+            <div class="col-md-5">
+                <div class="card border-0 shadow-sm rounded-4 text-center p-4">
+                    <div class="d-inline-flex align-items-center justify-content-center bg-primary-subtle text-primary rounded-circle mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2.5rem;">
+                        <i class="bi bi-person"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1">{{ user.first_name }} {{ user.last_name }}</h4>
+                    <p class="text-muted small mb-3">@{{ user.username }}</p>
+                    
+                    <div class="list-group list-group-flush text-start small border-top pt-3">
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 border-0">
+                            <span class="text-muted"><i class="bi bi-envelope me-1"></i> Email:</span>
+                            <span class="fw-semibold text-truncate ms-2" style="max-width: 160px;">{{ user.email }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 border-0">
+                            <span class="text-muted"><i class="bi bi-calendar3 me-1"></i> Joined:</span>
+                            <span class="fw-semibold">{{ user.date_joined|date:"M d, Y" }}</span>
+                        </div>
+                        <div class="list-group-item d-flex justify-content-between align-items-center px-0 border-0">
+                            <span class="text-muted"><i class="bi bi-briefcase me-1"></i> Applications:</span>
+                            <span class="badge bg-primary rounded-pill px-2 py-1">{{ application_count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Edit Form -->
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm rounded-4 p-4">
+                    <h5 class="fw-bold text-dark mb-1">
+                        <i class="bi bi-pencil-square me-2 text-primary"></i> Edit Profile Information
+                    </h5>
+                    <p class="text-muted small mb-4">Keep your name and contact email up to date</p>
+
+                    <form method="POST" action="{% url 'profile' %}" novalidate>
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger py-2 small mb-3">
+                                {% for error in form.non_field_errors %}
+                                    <div><i class="bi bi-exclamation-circle me-1"></i> {{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small text-secondary">Username</label>
+                            <input type="text" class="form-control bg-light" value="{{ user.username }}" readonly disabled>
+                            <div class="form-text small text-muted">Usernames cannot be changed.</div>
+                        </div>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-sm-6">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold small text-secondary">First Name</label>
+                                {{ form.first_name }}
+                                {% if form.first_name.errors %}
+                                    <div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold small text-secondary">Last Name</label>
+                                {{ form.last_name }}
+                                {% if form.last_name.errors %}
+                                    <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold small text-secondary">Email Address</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 fw-semibold shadow-sm">
+                            <i class="bi bi-check2-circle me-1"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

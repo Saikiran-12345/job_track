@@ -36,11 +36,11 @@ INSTALLED_APPS = [
     # Third-party apps
     'rest_framework',
 
-    # JobTrack local apps (will be created in upcoming stages)
-    # 'accounts',
-    # 'jobs',
-    # 'interviews',
-    # 'api',
+    # JobTrack local apps
+    'accounts',
+    'jobs',
+    'interviews',
+    'api',
 ]
 
 MIDDLEWARE = [
