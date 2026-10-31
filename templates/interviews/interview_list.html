@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Interview Management – JobTrack{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-calendar-check text-primary me-2"></i>Interview Management
+        </h3>
+        <p class="text-muted small mb-0">Track upcoming rounds, interviewers, meeting links, and post-round feedback</p>
+    </div>
+    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <a href="{% url 'interview_create' %}" class="btn btn-primary rounded-pill px-3 shadow-sm">
+            <i class="bi bi-calendar-plus me-1"></i> Schedule Interview
+        </a>
+    </div>
+</div>
+
+<!-- Tabs Filter -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <ul class="nav nav-pills bg-white p-1 rounded-pill shadow-sm border">
+        <li class="nav-item">
+            <a class="nav-link rounded-pill px-3 py-1 {% if tab_filter == 'all' %}active bg-primary text-white{% else %}text-muted{% endif %}" href="?tab=all">
+                All Interviews <span class="badge bg-secondary ms-1">{{ total_count }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link rounded-pill px-3 py-1 {% if tab_filter == 'upcoming' %}active bg-primary text-white{% else %}text-muted{% endif %}" href="?tab=upcoming">
+                Upcoming <span class="badge bg-warning text-dark ms-1">{{ upcoming_count }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link rounded-pill px-3 py-1 {% if tab_filter == 'completed' %}active bg-primary text-white{% else %}text-muted{% endif %}" href="?tab=completed">
+                Completed
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Interviews List Card -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-body p-0">
+        {% if interviews %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Company & Job Title</th>
+                            <th>Round Type</th>
+                            <th>Date & Time</th>
+                            <th>Status</th>
+                            <th>Meeting / Location</th>
+                            <th>Feedback / Notes</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in interviews %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">
+                                        <a href="{% url 'job_detail' item.job_application.pk %}" class="text-dark text-decoration-none hover-primary">
+                                            {{ item.job_application.company_name }}
+                                        </a>
+                                    </div>
+                                    <div class="text-muted small">
+                                        {{ item.job_application.job_title }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 rounded-pill">
+                                        {{ item.interview_round }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark small">
+                                        {{ item.interview_date|date:"D, M d, Y" }}
+                                    </div>
+                                    <div class="text-muted small">
+                                        <i class="bi bi-clock me-1"></i>{{ item.interview_date|date:"h:i A" }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge {% if item.status == 'Scheduled' %}bg-warning-subtle text-warning-emphasis border border-warning-subtle{% elif item.status == 'Completed' %}bg-success-subtle text-success-emphasis border border-success-subtle{% else %}bg-danger-subtle text-danger-emphasis border border-danger-subtle{% endif %} px-2 py-1 rounded-pill">
+                                        {{ item.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if item.location_or_link %}
+                                        {% if 'http' in item.location_or_link %}
+                                            <a href="{{ item.location_or_link }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill small">
+                                                <i class="bi bi-camera-video me-1"></i> Join Call
+                                            </a>
+                                        {% else %}
+                                            <span class="small text-secondary"><i class="bi bi-geo-alt me-1"></i>{{ item.location_or_link }}</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted small">—</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.notes_or_feedback %}
+                                        <span class="small text-muted text-truncate d-inline-block" style="max-width: 200px;" title="{{ item.notes_or_feedback }}">
+                                            {{ item.notes_or_feedback }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted small fst-italic">No notes</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'interview_update' item.pk %}" class="btn btn-outline-primary" title="Edit Interview">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'interview_delete' item.pk %}" class="btn btn-outline-danger" title="Delete Interview">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state p-5 text-center">
+                <div class="empty-state-icon">
+                    <i class="bi bi-calendar2-check"></i>
+                </div>
+                <h5 class="fw-bold text-dark">No interviews found</h5>
+                <p class="text-muted small mx-auto" style="max-width: 400px;">
+                    {% if tab_filter == 'upcoming' %}
+                        You have no upcoming interviews scheduled at the moment. Keep applying!
+                    {% elif tab_filter == 'completed' %}
+                        No completed interviews recorded yet.
+                    {% else %}
+                        You haven't scheduled any interviews yet. When a company responds, schedule an interview to track the round details!
+                    {% endif %}
+                </p>
+                <a href="{% url 'interview_create' %}" class="btn btn-primary btn-sm px-3 rounded-pill mt-2">
+                    <i class="bi bi-calendar-plus me-1"></i> Schedule Interview
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

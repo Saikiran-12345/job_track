@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ application.job_title }} at {{ application.company_name }} – JobTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-2">
+    <div class="col-lg-10">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'job_list' %}" class="text-decoration-none">Applications</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ application.job_title }}</li>
+            </ol>
+        </nav>
+
+        <!-- Main Header Card -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                            <span class="badge {{ application.get_status_badge_class }} px-3 py-2 rounded-pill fs-6">
+                                <i class="bi bi-circle-fill me-1 small"></i>{{ application.application_status }}
+                            </span>
+                            <span class="badge bg-light text-dark border px-3 py-2 rounded-pill fs-6">
+                                {{ application.job_type }}
+                            </span>
+                        </div>
+                        <h2 class="fw-bold text-dark mb-1">{{ application.job_title }}</h2>
+                        <h5 class="text-muted mb-3">
+                            <i class="bi bi-building me-1"></i>{{ application.company_name }}
+                        </h5>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3 mt-md-0">
+                        <a href="{% url 'job_update' application.pk %}" class="btn btn-outline-primary px-3 rounded-pill shadow-sm">
+                            <i class="bi bi-pencil me-1"></i> Edit
+                        </a>
+                        <a href="{% url 'job_delete' application.pk %}" class="btn btn-outline-danger px-3 rounded-pill shadow-sm">
+                            <i class="bi bi-trash me-1"></i> Delete
+                        </a>
+                    </div>
+                </div>
+
+                <hr class="my-4">
+
+                <!-- Key Metrics Grid -->
+                <div class="row g-3 text-center">
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3">
+                            <div class="text-muted small mb-1"><i class="bi bi-geo-alt me-1"></i> Location</div>
+                            <div class="fw-bold text-dark">{{ application.job_location }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3">
+                            <div class="text-muted small mb-1"><i class="bi bi-calendar3 me-1"></i> Applied On</div>
+                            <div class="fw-bold text-dark">{{ application.application_date|date:"M d, Y" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3">
+                            <div class="text-muted small mb-1"><i class="bi bi-cash-stack me-1"></i> Salary / CTC</div>
+                            <div class="fw-bold text-dark">{{ application.salary|default:"Not specified" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-3 bg-light rounded-3">
+                            <div class="text-muted small mb-1"><i class="bi bi-link-45deg me-1"></i> Posting Link</div>
+                            <div>
+                                {% if application.job_url %}
+                                    <a href="{{ application.job_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-link text-primary fw-bold p-0 text-decoration-none">
+                                        Open Link <i class="bi bi-box-arrow-up-right small"></i>
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted small">None provided</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Column: Description & Notes -->
+            <div class="col-lg-7">
+                <!-- Job Description -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-file-text me-2 text-primary"></i> Job Description & Requirements
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if application.job_description %}
+                            <div class="text-secondary" style="white-space: pre-wrap; line-height: 1.6;">{{ application.job_description }}</div>
+                        {% else %}
+                            <p class="text-muted small mb-0 fst-italic">No job description was added for this position.</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Personal Notes -->
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-journal-text me-2 text-primary"></i> Personal Notes & Follow-ups
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if application.notes %}
+                            <div class="text-secondary" style="white-space: pre-wrap; line-height: 1.6;">{{ application.notes }}</div>
+                        {% else %}
+                            <p class="text-muted small mb-0 fst-italic">No personal notes added yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Interviews for this Application -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4 pb-2 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-calendar-event me-2 text-primary"></i> Interviews
+                        </h5>
+                        <a href="{% url 'interview_create_for_job' application.pk %}" class="btn btn-sm btn-primary rounded-pill px-3">
+                            <i class="bi bi-plus-lg me-1"></i> Schedule
+                        </a>
+                    </div>
+                    <div class="card-body p-4">
+                        {% if interviews %}
+                            <div class="list-group list-group-flush">
+                                {% for interview in interviews %}
+                                    <div class="list-group-item px-0 py-3 border-bottom">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill me-1">
+                                                    {{ interview.interview_round }}
+                                                </span>
+                                                <span class="badge {% if interview.status == 'Scheduled' %}bg-warning-subtle text-warning-emphasis border border-warning-subtle{% elif interview.status == 'Completed' %}bg-success-subtle text-success-emphasis border border-success-subtle{% else %}bg-danger-subtle text-danger-emphasis border border-danger-subtle{% endif %} rounded-pill">
+                                                    {{ interview.status }}
+                                                </span>
+                                            </div>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'interview_update' interview.pk %}" class="btn btn-outline-secondary btn-sm py-0 px-2" title="Edit Interview">
+                                                    <i class="bi bi-pencil small"></i>
+                                                </a>
+                                                <a href="{% url 'interview_delete' interview.pk %}" class="btn btn-outline-danger btn-sm py-0 px-2" title="Delete Interview">
+                                                    <i class="bi bi-trash small"></i>
+                                                </a>
+                                            </div>
+                                        </div>
+                                        <div class="fw-bold text-dark small mb-1">
+                                            <i class="bi bi-clock me-1 text-muted"></i> {{ interview.interview_date|date:"D, M d, Y - h:i A" }}
+                                        </div>
+                                        {% if interview.location_or_link %}
+                                            <div class="text-muted small mb-1">
+                                                <i class="bi bi-link-45deg me-1"></i> {{ interview.location_or_link }}
+                                            </div>
+                                        {% endif %}
+                                        {% if interview.notes_or_feedback %}
+                                            <div class="small bg-light p-2 rounded-3 mt-2 text-secondary">
+                                                <strong>Feedback:</strong> {{ interview.notes_or_feedback }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4 text-muted">
+                                <i class="bi bi-calendar2-x fs-2 d-block mb-2 text-secondary"></i>
+                                <p class="small mb-2">No interviews scheduled yet for this application.</p>
+                                <a href="{% url 'interview_create_for_job' application.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                    Schedule Interview
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

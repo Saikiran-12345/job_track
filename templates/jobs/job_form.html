@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ action_verb }} Job Application – JobTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-2">
+    <div class="col-lg-9 col-xl-8">
+        <!-- Breadcrumbs -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'job_list' %}" class="text-decoration-none">Applications</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ action_verb }} Application</li>
+            </ol>
+        </nav>
+
+        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
+            <div class="d-flex align-items-center mb-4">
+                <div class="bg-primary text-white rounded-3 p-3 me-3 fs-4 shadow-sm">
+                    <i class="bi bi-briefcase"></i>
+                </div>
+                <div>
+                    <h4 class="fw-bold text-dark mb-1">{{ action_verb }} Job Application</h4>
+                    <p class="text-muted small mb-0">Record all vital details about the position, compensation, and interview progress</p>
+                </div>
+            </div>
+
+            <form method="POST" novalidate>
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger py-2 small mb-4">
+                        {% for error in form.non_field_errors %}
+                            <div><i class="bi bi-exclamation-circle me-1"></i> {{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Basic Information -->
+                <h6 class="fw-bold text-secondary text-uppercase small letter-spacing mb-3">1. Basic Details</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="{{ form.company_name.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                            Company Name <span class="text-danger">*</span>
+                        </label>
+                        {{ form.company_name }}
+                        {% if form.company_name.errors %}
+                            <div class="text-danger small mt-1">{{ form.company_name.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6">
+                        <label for="{{ form.job_title.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                            Job Title / Role <span class="text-danger">*</span>
+                        </label>
+                        {{ form.job_title }}
+                        {% if form.job_title.errors %}
+                            <div class="text-danger small mt-1">{{ form.job_title.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Logistics & Status -->
+                <h6 class="fw-bold text-secondary text-uppercase small letter-spacing mb-3">2. Status & Location</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="{{ form.job_location.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                            Location <span class="text-danger">*</span>
+                        </label>
+                        {{ form.job_location }}
+                        {% if form.job_location.errors %}
+                            <div class="text-danger small mt-1">{{ form.job_location.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.job_type.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                            Employment Type
+                        </label>
+                        {{ form.job_type }}
+                        {% if form.job_type.errors %}
+                            <div class="text-danger small mt-1">{{ form.job_type.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.application_status.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                            Application Status
+                        </label>
+                        {{ form.application_status }}
+                        {% if form.application_status.errors %}
+                            <div class="text-danger small mt-1">{{ form.application_status.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Dates & Compensation -->
+                <h6 class="fw-bold text-secondary text-uppercase small letter-spacing mb-3">3. Compensation & Timing</h6>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="{{ form.application_date.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                            Application Date <span class="text-danger">*</span>
+                        </label>
+                        {{ form.application_date }}
+                        {% if form.application_date.errors %}
+                            <div class="text-danger small mt-1">{{ form.application_date.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.salary.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                            Salary / CTC
+                        </label>
+                        {{ form.salary }}
+                        {% if form.salary.errors %}
+                            <div class="text-danger small mt-1">{{ form.salary.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label for="{{ form.job_url.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                            Job Posting Link
+                        </label>
+                        {{ form.job_url }}
+                        {% if form.job_url.errors %}
+                            <div class="text-danger small mt-1">{{ form.job_url.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Job Description & Notes -->
+                <h6 class="fw-bold text-secondary text-uppercase small letter-spacing mb-3">4. Additional Notes</h6>
+                <div class="mb-3">
+                    <label for="{{ form.job_description.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                        Job Description / Requirements
+                    </label>
+                    {{ form.job_description }}
+                    {% if form.job_description.errors %}
+                        <div class="text-danger small mt-1">{{ form.job_description.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.notes.id_for_label }}" class="form-label fw-semibold small text-secondary">
+                        Personal Notes & Follow-ups
+                    </label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}
+                        <div class="text-danger small mt-1">{{ form.notes.errors.0 }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Form Action Buttons -->
+                <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                    <a href="{% if application %}{% url 'job_detail' application.pk %}{% else %}{% url 'job_list' %}{% endif %}" class="btn btn-outline-secondary px-4 rounded-3">
+                        Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4 rounded-3 fw-semibold shadow-sm">
+                        <i class="bi bi-check2-circle me-1"></i> Save Application
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

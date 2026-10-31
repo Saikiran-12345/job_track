@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}Job Applications – JobTrack{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-card-checklist text-primary me-2"></i>Job Applications
+        </h3>
+        <p class="text-muted small mb-0">Manage, search, and track all your submitted applications</p>
+    </div>
+    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <a href="{% url 'job_create' %}" class="btn btn-primary rounded-pill px-3 shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Add New Application
+        </a>
+    </div>
+</div>
+
+<!-- Search & Filtering Card -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-3 p-lg-4">
+        <form method="GET" action="{% url 'job_list' %}" class="row g-3 align-items-center">
+            <!-- Search Text -->
+            <div class="col-lg-4 col-md-6">
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="q" class="form-control bg-light border-start-0" placeholder="Search company, title, location..." value="{{ search_query }}">
+                </div>
+            </div>
+
+            <!-- Status Filter -->
+            <div class="col-lg-3 col-md-6">
+                <select name="status" class="form-select bg-light">
+                    <option value="">All Statuses</option>
+                    {% for code, label in status_choices %}
+                        <option value="{{ code }}" {% if status_filter == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Job Type Filter -->
+            <div class="col-lg-2 col-md-6">
+                <select name="job_type" class="form-select bg-light">
+                    <option value="">All Types</option>
+                    {% for code, label in job_type_choices %}
+                        <option value="{{ code }}" {% if job_type_filter == code %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Sort By -->
+            <div class="col-lg-2 col-md-6">
+                <select name="sort" class="form-select bg-light">
+                    <option value="-application_date" {% if sort_by == '-application_date' %}selected{% endif %}>Newest Date</option>
+                    <option value="application_date" {% if sort_by == 'application_date' %}selected{% endif %}>Oldest Date</option>
+                    <option value="company_name" {% if sort_by == 'company_name' %}selected{% endif %}>Company (A-Z)</option>
+                    <option value="-company_name" {% if sort_by == '-company_name' %}selected{% endif %}>Company (Z-A)</option>
+                </select>
+            </div>
+
+            <!-- Submit & Reset -->
+            <div class="col-lg-1 col-12 d-flex gap-2">
+                <button type="submit" class="btn btn-primary w-100" title="Apply Filters">
+                    <i class="bi bi-funnel"></i>
+                </button>
+                {% if search_query or status_filter or job_type_filter or sort_by != '-application_date' %}
+                    <a href="{% url 'job_list' %}" class="btn btn-outline-secondary" title="Reset Filters">
+                        <i class="bi bi-x-lg"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Applications Table Card -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <h6 class="fw-bold mb-0 text-secondary">
+            Results ({{ total_filtered_count }} application{{ total_filtered_count|pluralize }})
+        </h6>
+    </div>
+
+    <div class="card-body p-0">
+        {% if applications %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Job Title & Company</th>
+                            <th>Location</th>
+                            <th>Type</th>
+                            <th>Applied Date</th>
+                            <th>Salary</th>
+                            <th>Status</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in applications %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">
+                                        <a href="{% url 'job_detail' job.pk %}" class="text-dark text-decoration-none hover-primary">
+                                            {{ job.job_title }}
+                                        </a>
+                                    </div>
+                                    <div class="text-muted small">
+                                        <i class="bi bi-building me-1"></i>{{ job.company_name }}
+                                        {% if job.job_url %}
+                                            <a href="{{ job.job_url }}" target="_blank" rel="noopener noreferrer" class="ms-1 text-primary text-decoration-none" title="Open Job Posting">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-secondary small">
+                                        <i class="bi bi-geo-alt me-1"></i>{{ job.job_location }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        {{ job.job_type }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="small text-muted">
+                                        {{ job.application_date|date:"M d, Y" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="small fw-medium text-dark">
+                                        {{ job.salary|default:"Not specified" }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge {{ job.get_status_badge_class }} px-2 py-1 rounded-pill">
+                                        {{ job.application_status }}
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'job_detail' job.pk %}" class="btn btn-outline-secondary" title="View Details">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="{% url 'job_update' job.pk %}" class="btn btn-outline-primary" title="Edit Application">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'job_delete' job.pk %}" class="btn btn-outline-danger" title="Delete Application">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+                <div class="card-footer bg-white border-0 py-3">
+                    <nav aria-label="Application page navigation">
+                        <ul class="pagination pagination-sm justify-content-center mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if job_type_filter %}&job_type={{ job_type_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                                        &laquo; Previous
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">&laquo; Previous</span></li>
+                            {% endif %}
+
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if job_type_filter %}&job_type={{ job_type_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                                            {{ num }}
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if job_type_filter %}&job_type={{ job_type_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
+                                        Next &raquo;
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">Next &raquo;</span></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            {% endif %}
+
+        {% else %}
+            <!-- Empty State -->
+            <div class="empty-state p-5 text-center">
+                <div class="empty-state-icon">
+                    <i class="bi bi-inbox"></i>
+                </div>
+                <h5 class="fw-bold text-dark">No job applications found</h5>
+                <p class="text-muted small mx-auto" style="max-width: 400px;">
+                    {% if search_query or status_filter or job_type_filter %}
+                        No applications matched your search filters. Try resetting the filters to view all records.
+                    {% else %}
+                        You haven't tracked any job applications yet. Add your first job application to get started!
+                    {% endif %}
+                </p>
+                {% if search_query or status_filter or job_type_filter %}
+                    <a href="{% url 'job_list' %}" class="btn btn-outline-secondary btn-sm px-3 rounded-pill mt-2">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Clear Filters
+                    </a>
+                {% else %}
+                    <a href="{% url 'job_create' %}" class="btn btn-primary btn-sm px-3 rounded-pill mt-2">
+                        <i class="bi bi-plus-lg me-1"></i> Add First Application
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

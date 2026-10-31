@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Delete – {{ application.job_title }} – JobTrack{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="card-body p-4 p-md-5 text-center">
+                <div class="d-inline-flex align-items-center justify-content-center bg-danger-subtle text-danger rounded-circle p-3 mb-3" style="width: 70px; height: 70px; font-size: 2rem;">
+                    <i class="bi bi-exclamation-triangle"></i>
+                </div>
+                
+                <h4 class="fw-bold text-dark mb-2">Delete Job Application?</h4>
+                <p class="text-muted small mb-4">
+                    Are you sure you want to permanently delete the application for:
+                    <br>
+                    <strong class="text-dark fs-6">{{ application.job_title }}</strong> at <strong class="text-dark fs-6">{{ application.company_name }}</strong>?
+                </p>
+
+                <div class="alert alert-warning small text-start mb-4 border-0">
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    <strong>Notice:</strong> This action cannot be undone. Any scheduled interviews and notes associated with this application will also be deleted.
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center gap-2">
+                        <a href="{% url 'job_detail' application.pk %}" class="btn btn-outline-secondary px-4 rounded-3">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger px-4 rounded-3 fw-semibold shadow-sm">
+                            <i class="bi bi-trash me-1"></i> Yes, Delete Application
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
