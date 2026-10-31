@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics & Reports – JobTrack{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-graph-up-arrow text-primary me-2"></i>Job Search Analytics
+        </h3>
+        <p class="text-muted small mb-0">Visual performance charts, status distribution, and submission trends</p>
+    </div>
+    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <a href="{% url 'job_list' %}" class="btn btn-outline-secondary rounded-pill px-3 shadow-sm">
+            <i class="bi bi-card-checklist me-1"></i> View All Applications
+        </a>
+    </div>
+</div>
+
+<!-- Key Performance Indicators Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Total Submissions</span>
+                <span class="badge bg-primary-subtle text-primary p-2 rounded-circle"><i class="bi bi-briefcase fs-5"></i></span>
+            </div>
+            <h2 class="fw-bold text-dark mb-0">{{ total_count }}</h2>
+            <small class="text-muted">Total tracked applications</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Interview Conversion Rate</span>
+                <span class="badge bg-purple-subtle text-purple p-2 rounded-circle" style="background-color: #ede9fe; color: #6d28d9;"><i class="bi bi-calendar2-check fs-5"></i></span>
+            </div>
+            <h2 class="fw-bold text-primary mb-0">{{ interview_rate }}%</h2>
+            <small class="text-muted">Applications reaching interview stage</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Selection / Offer Rate</span>
+                <span class="badge bg-success-subtle text-success p-2 rounded-circle"><i class="bi bi-trophy fs-5"></i></span>
+            </div>
+            <h2 class="fw-bold text-success mb-0">{{ selection_rate }}%</h2>
+            <small class="text-muted">Applications resulting in job offers</small>
+        </div>
+    </div>
+</div>
+
+<!-- Visual Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Chart 1: Monthly Trends (Line/Bar) -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-bar-chart-line text-primary me-2"></i>Monthly Application Trends
+                </h5>
+                <span class="badge bg-light text-muted border">Last 6 Months</span>
+            </div>
+            <div style="position: relative; height: 280px; width: 100%;">
+                <canvas id="monthlyTrendChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart 2: Status Distribution (Doughnut) -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <h5 class="fw-bold text-dark mb-3">
+                <i class="bi bi-pie-chart text-primary me-2"></i>Status Distribution
+            </h5>
+            <div style="position: relative; height: 280px; width: 100%;">
+                <canvas id="statusDoughnutChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Second Row: Job Type Breakdown & Status Table -->
+<div class="row g-4">
+    <!-- Chart 3: Job Types (Bar) -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <h5 class="fw-bold text-dark mb-3">
+                <i class="bi bi-diagram-3 text-primary me-2"></i>Applications by Employment Type
+            </h5>
+            <div style="position: relative; height: 260px; width: 100%;">
+                <canvas id="jobTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Breakdown Breakdown Table -->
+    <div class="col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="card-header bg-white border-0 py-3 px-4">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-table text-primary me-2"></i>Detailed Status Breakdown
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4">Status</th>
+                                <th class="text-center">Count</th>
+                                <th class="text-end pe-4">Share of Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for status, count in status_counts.items %}
+                                <tr>
+                                    <td class="ps-4 fw-semibold">
+                                        <i class="bi bi-circle-fill me-2 small {% if status == 'Applied' %}text-info{% elif status == 'Shortlisted' %}text-warning{% elif status == 'Interview' %}text-primary{% elif status == 'Selected' %}text-success{% else %}text-danger{% endif %}"></i>
+                                        {{ status }}
+                                    </td>
+                                    <td class="text-center fw-bold">{{ count }}</td>
+                                    <td class="text-end pe-4 text-muted small">
+                                        {% if total_count > 0 %}
+                                            {% widthratio count total_count 100 %}%
+                                        {% else %}
+                                            0%
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // 1. Monthly Trends Chart
+    const trendCtx = document.getElementById('monthlyTrendChart').getContext('2d');
+    const trendLabels = {{ trend_labels_json|safe }};
+    const trendValues = {{ trend_values_json|safe }};
+
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels: trendLabels,
+            datasets: [{
+                label: 'Applications Submitted',
+                data: trendValues,
+                borderColor: '#2563eb',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderWidth: 2.5,
+                fill: true,
+                tension: 0.35,
+                pointBackgroundColor: '#2563eb',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
+                    grid: { color: '#f1f5f9' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+
+    // 2. Status Distribution Doughnut Chart
+    const statusCtx = document.getElementById('statusDoughnutChart').getContext('2d');
+    const statusLabels = {{ status_labels_json|safe }};
+    const statusValues = {{ status_values_json|safe }};
+
+    new Chart(statusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusValues,
+                backgroundColor: [
+                    '#0284c7', // Applied (Sky Blue)
+                    '#d97706', // Shortlisted (Amber)
+                    '#7c3aed', // Interview (Purple)
+                    '#16a34a', // Selected (Emerald)
+                    '#dc2626'  // Rejected (Red)
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff',
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: { boxWidth: 12, padding: 14 }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+
+    // 3. Job Type Breakdown Horizontal Bar Chart
+    const typeCtx = document.getElementById('jobTypeChart').getContext('2d');
+    const typeLabels = {{ type_labels_json|safe }};
+    const typeValues = {{ type_values_json|safe }};
+
+    new Chart(typeCtx, {
+        type: 'bar',
+        data: {
+            labels: typeLabels,
+            datasets: [{
+                label: 'Applications',
+                data: typeValues,
+                backgroundColor: '#3b82f6',
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
+                    grid: { color: '#f1f5f9' }
+                },
+                y: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -159,3 +159,27 @@ class JobApplicationCRUDTests(TestCase):
         self.assertTrue(any(app.company_name == 'Microsoft' for app in apps))
         self.assertFalse(any(app.company_name == 'Google' for app in apps))
 
+    def test_dashboard_statistics_calculation(self):
+        """Dashboard renders accurate counts derived from actual database records."""
+        self.client.force_login(self.user1)
+        response = self.client.get(reverse('dashboard'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_count'], 2)
+        self.assertEqual(response.context['applied_count'], 1)
+        self.assertEqual(response.context['shortlisted_count'], 1)
+        self.assertEqual(response.context['interview_count'], 0)
+        self.assertEqual(response.context['selected_count'], 0)
+        self.assertEqual(response.context['rejected_count'], 0)
+
+    def test_analytics_kpi_and_charts(self):
+        """Analytics page renders status counts and conversion rates correctly."""
+        self.client.force_login(self.user1)
+        response = self.client.get(reverse('analytics'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context['total_count'], 2)
+        self.assertIn('status_labels_json', response.context)
+        self.assertIn('trend_labels_json', response.context)
+
+

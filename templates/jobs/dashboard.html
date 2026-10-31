@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard – JobTrack{% endblock %}
+
+{% block content %}
+<!-- Top Header & Actions -->
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+    <div>
+        <h3 class="fw-bold text-dark mb-1">
+            Welcome back, {{ user.first_name|default:user.username }}!
+        </h3>
+        <p class="text-muted small mb-0">Here is your job application performance and upcoming interview schedule</p>
+    </div>
+    <div class="d-flex gap-2 mt-3 mt-md-0">
+        <a href="{% url 'job_create' %}" class="btn btn-primary rounded-pill px-3 shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Add Application
+        </a>
+        <a href="{% url 'interview_create' %}" class="btn btn-outline-primary rounded-pill px-3 shadow-sm">
+            <i class="bi bi-calendar-plus me-1"></i> Schedule Interview
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards Row -->
+<div class="row g-3 mb-4">
+    <!-- Total Applications -->
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card stat-card border-0 shadow-sm p-3 h-100 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Total</span>
+                <div class="stat-icon bg-primary-subtle text-primary" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                    <i class="bi bi-briefcase"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold text-dark mb-0">{{ total_count }}</h3>
+            <small class="text-muted">Applications</small>
+        </div>
+    </div>
+
+    <!-- Applied -->
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card stat-card border-0 shadow-sm p-3 h-100 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Applied</span>
+                <div class="stat-icon bg-info-subtle text-info" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                    <i class="bi bi-send"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold text-dark mb-0">{{ applied_count }}</h3>
+            <small class="text-muted">Under Review</small>
+        </div>
+    </div>
+
+    <!-- Shortlisted -->
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card stat-card border-0 shadow-sm p-3 h-100 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Shortlisted</span>
+                <div class="stat-icon bg-warning-subtle text-warning-emphasis" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                    <i class="bi bi-star"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold text-dark mb-0">{{ shortlisted_count }}</h3>
+            <small class="text-muted">Profile Cleared</small>
+        </div>
+    </div>
+
+    <!-- Interview -->
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card stat-card border-0 shadow-sm p-3 h-100 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Interviews</span>
+                <div class="stat-icon bg-purple-subtle text-purple" style="width: 36px; height: 36px; font-size: 1.1rem; background-color: #ede9fe; color: #6d28d9;">
+                    <i class="bi bi-calendar2-check"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold text-dark mb-0">{{ interview_count }}</h3>
+            <small class="text-muted">In Progress</small>
+        </div>
+    </div>
+
+    <!-- Selected -->
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card stat-card border-0 shadow-sm p-3 h-100 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Selected</span>
+                <div class="stat-icon bg-success-subtle text-success" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                    <i class="bi bi-trophy"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold text-dark mb-0">{{ selected_count }}</h3>
+            <small class="text-muted">Job Offers</small>
+        </div>
+    </div>
+
+    <!-- Rejected -->
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card stat-card border-0 shadow-sm p-3 h-100 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-muted small fw-semibold">Rejected</span>
+                <div class="stat-icon bg-danger-subtle text-danger" style="width: 36px; height: 36px; font-size: 1.1rem;">
+                    <i class="bi bi-x-circle"></i>
+                </div>
+            </div>
+            <h3 class="fw-bold text-dark mb-0">{{ rejected_count }}</h3>
+            <small class="text-muted">Archive</small>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Metrics Bar -->
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-body p-3 p-md-4">
+        <div class="row align-items-center text-center text-md-start">
+            <div class="col-md-3 mb-2 mb-md-0">
+                <h6 class="fw-bold text-dark mb-0">Search Conversion Rate</h6>
+                <small class="text-muted">Ratio of applications leading to rounds</small>
+            </div>
+            <div class="col-md-4 mb-3 mb-md-0">
+                <div class="d-flex justify-content-between small fw-semibold mb-1">
+                    <span>Interview Rate</span>
+                    <span class="text-primary">{{ interview_rate }}%</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ interview_rate }}%;" aria-valuenow="{{ interview_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-2 mb-md-0">
+                <div class="d-flex justify-content-between small fw-semibold mb-1">
+                    <span>Selection Rate</span>
+                    <span class="text-success">{{ selection_rate }}%</span>
+                </div>
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ selection_rate }}%;" aria-valuenow="{{ selection_rate }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+            <div class="col-md-1 text-center">
+                <a href="{% url 'analytics' %}" class="btn btn-sm btn-link text-decoration-none fw-semibold">
+                    Charts <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Split: Recent Applications & Upcoming Interviews -->
+<div class="row g-4">
+    <!-- Left Column: Recent Applications (8 cols) -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-clock-history me-2 text-primary"></i>Recent Applications
+                </h5>
+                <a href="{% url 'job_list' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                    View All
+                </a>
+            </div>
+            <div class="card-body p-0">
+                {% if recent_applications %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Job Title & Company</th>
+                                    <th>Location</th>
+                                    <th>Applied Date</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in recent_applications %}
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="fw-bold">
+                                                <a href="{% url 'job_detail' job.pk %}" class="text-dark text-decoration-none hover-primary">
+                                                    {{ job.job_title }}
+                                                </a>
+                                            </div>
+                                            <div class="text-muted small">
+                                                <i class="bi bi-building me-1"></i>{{ job.company_name }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="small text-secondary">{{ job.job_location }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="small text-muted">{{ job.application_date|date:"M d, Y" }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge {{ job.get_status_badge_class }} px-2 py-1 rounded-pill">
+                                                {{ job.application_status }}
+                                            </span>
+                                        </td>
+                                        <td class="text-end pe-4">
+                                            <a href="{% url 'job_detail' job.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                View
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="empty-state p-5 text-center">
+                        <i class="bi bi-briefcase fs-1 text-muted d-block mb-2"></i>
+                        <h6 class="fw-bold text-dark">No job applications yet</h6>
+                        <p class="text-muted small mb-3">Add the positions you have applied for to begin tracking.</p>
+                        <a href="{% url 'job_create' %}" class="btn btn-primary btn-sm rounded-pill px-3">
+                            <i class="bi bi-plus-lg me-1"></i> Add First Application
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Upcoming Interviews (4 cols) -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+            <div class="card-header bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-calendar-event me-2 text-primary"></i>Upcoming Interviews
+                </h5>
+                <a href="{% url 'interview_list' %}" class="btn btn-sm btn-outline-secondary rounded-pill px-2">
+                    All
+                </a>
+            </div>
+            <div class="card-body p-3">
+                {% if upcoming_interviews %}
+                    <div class="list-group list-group-flush">
+                        {% for interview in upcoming_interviews %}
+                            <div class="list-group-item px-2 py-3 border-bottom">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill">
+                                        {{ interview.interview_round }}
+                                    </span>
+                                    <small class="text-muted fw-semibold">
+                                        <i class="bi bi-clock me-1"></i>{{ interview.interview_date|date:"h:i A" }}
+                                    </small>
+                                </div>
+                                <div class="fw-bold text-dark">
+                                    <a href="{% url 'job_detail' interview.job_application.pk %}" class="text-dark text-decoration-none">
+                                        {{ interview.job_application.company_name }}
+                                    </a>
+                                </div>
+                                <div class="text-muted small mb-2">
+                                    {{ interview.interview_application.job_title|default:interview.job_application.job_title }}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-primary fw-medium">
+                                        <i class="bi bi-calendar3 me-1"></i>{{ interview.interview_date|date:"D, M d" }}
+                                    </small>
+                                    {% if interview.location_or_link and 'http' in interview.location_or_link %}
+                                        <a href="{{ interview.location_or_link }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary py-0 px-2 rounded-pill small">
+                                            Join Link
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state p-4 text-center">
+                        <i class="bi bi-calendar-x fs-2 text-muted d-block mb-2"></i>
+                        <h6 class="fw-bold text-dark small mb-1">No upcoming interviews</h6>
+                        <p class="text-muted small mb-3">When a recruiter invites you for a round, schedule it here.</p>
+                        <a href="{% url 'interview_create' %}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                            Schedule Round
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
